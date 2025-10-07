@@ -1,10 +1,11 @@
 # Pençe Harekatı HTML Portu
 
-Bu proje, `Pence_Harekatı.html` dosyasında yer alan canvas tabanlı prototipin Unity 2021.3+ ortamına taşınmış halidir. `Assets/Scenes/Main.unity` sahnesini açıp **Play** tuşuna bastığınızda HTML sürümündeki temel oynanış (tank kontrolü, düşman dalgaları, seviye atlama ve yükseltmeler) aynen çalışır.
+Bu proje, `Pence_Harekatı.html` dosyasındaki canvas tabanlı prototipin Unity 2021.3+ ortamına taşınmış halidir. `Assets/Scenes/Main.unity` sahnesini açıp **Play** tuşuna bastığınızda HTML sürümündeki temel oynanış (tank kontrolü, düşman dalgaları, seviye atlama ve yükseltmeler) aynen çalışır.
 
 ## İçerik
 
-- `Assets/Scripts/HTMLPort/Core/SpriteLibrary` sınıfı, HTML sürümündeki canvas çizimlerinden esinlenerek sprite'ları **çalışma anında** prosedürel olarak üretir. Böylece depoda ikili PNG dosyalarına ihtiyaç kalmaz.
+- `Assets/Art/Sprites` klasöründeki PNG dosyaları, HTML canvas çizimlerinin bire bir piksel karşılıklarıdır ve Git LFS ile takip edilir.
+- `Assets/Scripts/HTMLPort/Core/SpriteLibrary`, bu PNG'leri çalışma anında `Texture2D.LoadImage` ile okuyup `Sprite.Create` aracılığıyla sahneye dağıtır.
 - `Assets/Scripts/HTMLPort` altındaki klasörler HTML prototipindeki sistemlerin yeniden yazılmış C# karşılıklarını içerir:
   - `Core`: Oyun döngüsü (`GameController`), Bootstrap ve sprite yükleme altyapısı.
   - `Systems`: Oyuncu, düşman, mermi ve XP küresi davranışları.
@@ -19,5 +20,6 @@ Bu proje, `Pence_Harekatı.html` dosyasında yer alan canvas tabanlı prototipin
 
 ## Notlar
 
-- Sprite'lar piksel-dostu olacak şekilde (PPU=64) üretilir ve filtreleme Point olarak ayarlanır.
+- Sprite'lar piksel-dostu olacak şekilde (PPU=64) ayarlanır ve filtreleme Point olarak işaretlenir.
+- Unity editöründe çalışırken sprite'lar `Assets/Art/Sprites` klasöründen, derlenmiş sürümlerde ise aynı göreceli yol StreamingAssets altına kopyalandığında otomatik olarak yüklenir.
 - HTML sürümündeki veri akışı korunarak GameController sınıfı içinde UI ve oyun durumları yönetilir.
