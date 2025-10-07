@@ -57,20 +57,19 @@ namespace PnceHarekat
             if (bodyRenderer == null)
             {
                 bodyRenderer = gameObject.AddComponent<SpriteRenderer>();
-                bodyRenderer.sprite = Resources.GetBuiltinResource<Sprite>("Sprites/Square.psd");
-                bodyRenderer.color = new Color(0.2f, 0.7f, 0.4f);
+                bodyRenderer.sprite = SpriteLibrary.LoadSprite("Sprites/player_body");
+                bodyRenderer.color = Color.white;
                 bodyRenderer.sortingOrder = 1;
 
-                transform.localScale = new Vector3(1f, 1.4f, 1f);
+                transform.localScale = Vector3.one;
 
                 var turret = new GameObject("Turret");
                 turretTransform = turret.transform;
                 turretTransform.SetParent(transform, false);
-                turretTransform.localPosition = new Vector3(0f, 0.4f, 0f);
-                turretTransform.localScale = new Vector3(0.35f, 0.9f, 1f);
+                turretTransform.localPosition = new Vector3(0f, 0.3f, 0f);
                 turretRenderer = turret.AddComponent<SpriteRenderer>();
-                turretRenderer.sprite = Resources.GetBuiltinResource<Sprite>("Sprites/Square.psd");
-                turretRenderer.color = new Color(0.9f, 0.9f, 0.2f);
+                turretRenderer.sprite = SpriteLibrary.LoadSprite("Sprites/player_turret", new Vector2(0.5f, 0.15f));
+                turretRenderer.color = Color.white;
                 turretRenderer.sortingOrder = 2;
             }
 
@@ -120,11 +119,7 @@ namespace PnceHarekat
 
         private void HandleMovement(float dt)
         {
-            Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            if (input.sqrMagnitude > 1f)
-            {
-                input.Normalize();
-            }
+            Vector2 input = PlayerInputRouter.ReadMovement();
 
             float currentSpeed = moveSpeed;
             if (dashing)
@@ -140,7 +135,7 @@ namespace PnceHarekat
 
         private void HandleAbilities(float dt)
         {
-            if (!dashing && Input.GetKeyDown(KeyCode.LeftShift))
+            if (!dashing && PlayerInputRouter.ConsumeDashPress())
             {
                 TryDash();
             }
@@ -154,7 +149,7 @@ namespace PnceHarekat
                 }
             }
 
-            if (!shieldActive && Input.GetKeyDown(KeyCode.Space))
+            if (!shieldActive && PlayerInputRouter.ConsumeShieldPress())
             {
                 TryActivateShield();
             }
@@ -276,6 +271,10 @@ namespace PnceHarekat
                 float spread = weapon.Spread * (weapon.ProjectilesPerShot > 1 ? ((float)i / (weapon.ProjectilesPerShot - 1) - 0.5f) : 0f);
                 Vector2 dir = Quaternion.Euler(0f, 0f, spread) * baseDirection;
                 var projectileGo = new GameObject($"Projectile_{weapon.Id}");
+                if (game != null && game.SpriteRoot != null)
+                {
+                    projectileGo.transform.SetParent(game.SpriteRoot, worldPositionStays: false);
+                }
                 var projectile = projectileGo.AddComponent<ProjectileController>();
                 projectile.Initialise(game, weapon, transform.position + (Vector3)(dir * 0.6f), dir, weapon.ProjectileSpeed, weapon.GetDamage(damageMultiplier));
             }
