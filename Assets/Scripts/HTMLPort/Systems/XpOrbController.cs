@@ -22,10 +22,10 @@ namespace PnceHarekat
             transform.position = position;
 
             renderer = gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = Resources.GetBuiltinResource<Sprite>("Sprites/Square.psd");
-            renderer.color = new Color(0.1f, 0.8f, 0.4f);
+            renderer.sprite = SpriteLibrary.LoadSprite("Sprites/xp_orb");
+            renderer.color = Color.white;
             renderer.sortingOrder = 1;
-            transform.localScale = new Vector3(0.4f, 0.4f, 1f);
+            transform.localScale = Vector3.one;
 
             game.RegisterXpOrb(this);
         }
@@ -46,7 +46,9 @@ namespace PnceHarekat
             }
 
             hoverTimer += Time.deltaTime;
-            transform.localScale = new Vector3(0.4f + Mathf.Sin(hoverTimer * 3f) * 0.05f, 0.4f + Mathf.Sin(hoverTimer * 3f + 1f) * 0.05f, 1f);
+            float baseScale = 0.75f;
+            float wobble = 0.08f;
+            transform.localScale = new Vector3(baseScale + Mathf.Sin(hoverTimer * 3f) * wobble, baseScale + Mathf.Sin(hoverTimer * 3f + 1f) * wobble, 1f);
 
             Vector3 toPlayer = player.transform.position - transform.position;
             float distance = toPlayer.magnitude;

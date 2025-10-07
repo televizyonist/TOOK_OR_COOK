@@ -30,9 +30,9 @@ namespace PnceHarekat
             if (renderer == null)
             {
                 renderer = gameObject.AddComponent<SpriteRenderer>();
-                renderer.sprite = Resources.GetBuiltinResource<Sprite>("Sprites/Square.psd");
+                renderer.sprite = SpriteLibrary.LoadSprite("Sprites/enemy_basic");
                 renderer.sortingOrder = 0;
-                transform.localScale = new Vector3(0.8f, 0.8f, 1f);
+                transform.localScale = Vector3.one;
             }
 
             renderer.color = archetype.BodyColor;

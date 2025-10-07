@@ -46,6 +46,7 @@ namespace PnceHarekat
 
         private UIController ui;
         private PlayerController player;
+        private Transform spriteRoot;
 
         private float enemySpawnTimer;
         private float enemySpawnInterval = 2.5f;
@@ -74,10 +75,13 @@ namespace PnceHarekat
             DontDestroyOnLoad(gameObject);
         }
 
+        public Transform SpriteRoot => spriteRoot;
+
         private void Start()
         {
             Application.targetFrameRate = 60;
             Cursor.visible = true;
+            EnsureSpriteRoot();
             BuildBackground();
             CreateEventSystemIfNeeded();
             ui = UIController.Create(this);
@@ -121,15 +125,53 @@ namespace PnceHarekat
             ui.UpdateHud(elapsedTime, score, money, flags);
         }
 
+        private void EnsureSpriteRoot()
+        {
+            if (spriteRoot != null)
+            {
+                return;
+            }
+
+            var existing = transform.Find("Sprites");
+            if (existing != null)
+            {
+                spriteRoot = existing;
+            }
+            else
+            {
+                var go = new GameObject("Sprites");
+                spriteRoot = go.transform;
+                spriteRoot.SetParent(transform);
+            }
+
+            spriteRoot.localPosition = Vector3.zero;
+            spriteRoot.localRotation = Quaternion.identity;
+            spriteRoot.localScale = Vector3.one;
+        }
+
         private void BuildBackground()
         {
             var background = new GameObject("Background");
-            background.transform.SetParent(transform);
+            background.transform.SetParent(spriteRoot);
             background.transform.position = new Vector3(playArea.center.x, playArea.center.y, 5f);
             var sr = background.AddComponent<SpriteRenderer>();
-            sr.sprite = Resources.GetBuiltinResource<Sprite>("Sprites/Square.psd");
-            sr.color = new Color(0.015f, 0.045f, 0.03f, 1f);
-            background.transform.localScale = new Vector3(playArea.width + 4f, playArea.height + 4f, 1f);
+            sr.sprite = SpriteLibrary.LoadSprite("Sprites/background_tile");
+            sr.color = Color.white;
+            sr.sortingOrder = -10;
+
+            if (sr.sprite != null)
+            {
+                float spriteWidth = sr.sprite.rect.width / sr.sprite.pixelsPerUnit;
+                float spriteHeight = sr.sprite.rect.height / sr.sprite.pixelsPerUnit;
+                background.transform.localScale = new Vector3(
+                    (playArea.width + 6f) / spriteWidth,
+                    (playArea.height + 6f) / spriteHeight,
+                    1f);
+            }
+            else
+            {
+                background.transform.localScale = new Vector3(playArea.width + 4f, playArea.height + 4f, 1f);
+            }
 
             var grid = new GameObject("BackgroundGrid");
             grid.transform.SetParent(background.transform, worldPositionStays: false);
@@ -410,6 +452,7 @@ namespace PnceHarekat
 
         public void StartGame(GameDifficulty selectedDifficulty)
         {
+            EnsureSpriteRoot();
             difficulty = selectedDifficulty;
             state = GameState.Playing;
             Time.timeScale = 1f;
@@ -426,6 +469,7 @@ namespace PnceHarekat
             if (player == null)
             {
                 var playerGo = new GameObject("Player");
+                playerGo.transform.SetParent(spriteRoot, worldPositionStays: false);
                 player = playerGo.AddComponent<PlayerController>();
             }
             player.transform.position = playArea.center;
@@ -476,6 +520,7 @@ namespace PnceHarekat
             var archetype = EnemyArchetype.Sample(difficulty, wave, rng);
             Vector2 spawnPos = GetRandomSpawnPosition();
             var go = new GameObject("Enemy " + archetype.Name);
+            go.transform.SetParent(spriteRoot, worldPositionStays: false);
             var enemy = go.AddComponent<EnemyController>();
             enemy.Initialise(this, archetype, spawnPos);
         }
@@ -511,6 +556,7 @@ namespace PnceHarekat
         private void SpawnXpOrb(Vector3 position, float xpAmount)
         {
             var go = new GameObject("XP Orb");
+            go.transform.SetParent(spriteRoot, worldPositionStays: false);
             var orb = go.AddComponent<XpOrbController>();
             orb.Initialise(this, player, position, xpAmount);
         }
@@ -724,6 +770,7 @@ namespace PnceHarekat
                 font = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
                 canvas = new GameObject("UI Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)).GetComponent<Canvas>();
+                canvas.transform.SetParent(game.transform);
                 canvas.renderMode = RenderMode.ScreenSpaceOverlay;
                 var scaler = canvas.GetComponent<CanvasScaler>();
                 scaler.referenceResolution = new Vector2(1920, 1080);
