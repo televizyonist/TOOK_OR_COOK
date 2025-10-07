@@ -27,10 +27,10 @@ namespace PnceHarekat
             transform.position = position;
 
             var renderer = gameObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = Resources.GetBuiltinResource<Sprite>("Sprites/Square.psd");
-            renderer.color = Color.Lerp(Color.white, new Color(0f, 1f, 0.6f), 0.3f);
+            renderer.sprite = SpriteLibrary.LoadSprite("Sprites/projectile_bolt");
+            renderer.color = Color.white;
             renderer.sortingOrder = 3;
-            transform.localScale = new Vector3(0.2f, 0.6f, 1f);
+            transform.localScale = Vector3.one;
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
             transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
